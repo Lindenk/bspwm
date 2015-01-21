@@ -55,8 +55,25 @@ monitor_t *make_monitor(xcb_rectangle_t rect)
 	return m;
 }
 
+monitor_t *make_dummy_monitor()
+{
+	monitor_t *m = malloc(sizeof(monitor_t));
+	snprintf(m->name, sizeof(m->name), "%s%02d", DEFAULT_DUMMY_MON_NAME, ++monitor_uid);
+	m->prev = m->next = NULL;
+	m->desk = m->desk_head = m->desk_tail = NULL;
+	m->rectangle = (xcb_rectangle_t) {0, 0, 64, 64};
+	m->top_padding = m->right_padding = m->bottom_padding = m->left_padding = 0;
+	m->wired = true;
+	m->num_sticky = 0;
+	return m;
+}
+
 monitor_t *find_monitor(char *name)
 {
+	if (streq(mon_aether->name, name)) {
+		return mon_aether;
+	}
+
 	for (monitor_t *m = mon_head; m != NULL; m = m->next)
 		if (streq(m->name, name))
 			return m;
@@ -182,6 +199,18 @@ void remove_monitor(monitor_t *m)
 			update_current();
 	}
 	xcb_destroy_window(dpy, m->root);
+	free(m);
+	num_monitors--;
+	put_status();
+}
+
+void remove_dummy_monitor(monitor_t *m)
+{
+	PRINTF("remove monitor %s (0x%X)\n", m->name, m->id);
+
+	while (m->desk_head != NULL)
+		remove_desktop(m, m->desk_head);
+
 	free(m);
 	num_monitors--;
 	put_status();

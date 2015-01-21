@@ -42,6 +42,7 @@ xcb_window_t root;
 uint8_t root_depth;
 char config_path[MAXLEN];
 
+monitor_t *mon_aether;
 monitor_t *mon;
 monitor_t *mon_head;
 monitor_t *mon_tail;

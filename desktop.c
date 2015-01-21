@@ -40,6 +40,10 @@ void focus_desktop(monitor_t *m, desktop_t *d)
 	if (d == mon->desk)
 		return;
 
+	//prevent anything on aether from getting focused
+	if (m == mon_aether)
+		return;
+
 	PRINTF("focus desktop %s\n", d->name);
 
 	show_desktop(d);
